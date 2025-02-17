@@ -250,6 +250,7 @@ async function extrairInformacoes(){
         await converterDolar(dados_tratados_acoes, data);
     }
 
-    console.log(dados_tratados_acoes)
+    return dados_tratados_acoes;
 }
-extrairInformacoes();
+
+module.exports = { extrairInformacoes }; 
