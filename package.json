@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "apexcharts": "^4.5.0",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "yahoo-finance2": "^2.13.3"
