@@ -11,7 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
-<body>
+<body onload="atribuirMaxCalendario()">
     <header>
         <img src="../imagens/logo-2.png" alt="Logo da empresa Ações & Mercado">
         <nav>
@@ -25,7 +25,19 @@
         </nav>
     </header>
     <main>
-        <button onclick="processoRequisicao()"></button>
+        <!--
+            Diferença entr 'name' e 'id':
+            - Name: Nome da variável;
+            - Id: Manipulação do valor e CSS 
+        -->
+        <form onsubmit="return false">
+            <input type="text" name="acao" id="acao">
+            <input type="date" name="data_inicio" id="data_inicio" required>
+            <input type="date" name="data_final" id="data_final" required>
+            <input type="radio" name="" id="">
+            <input type="radio" name="" id="">
+            <input type="submit" onclick="processoRequisicao()">
+        </form>
     </main>
     <footer id="simular">
         <div id="estrutura">
