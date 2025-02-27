@@ -3,6 +3,22 @@ body{
     display: flex;
     flex-direction: column;
 }
+
+#erro_mensagem {
+    background-color: #F07167;
+    
+    white-space: pre-line;
+    padding: 20px 0;
+    margin-top: 150px;
+}
+
+#erro_mensagem > p {
+    color: white;
+    font-size: 25px;
+
+    text-align: center;
+}
+
 footer{
     margin-top: auto;
 }
