@@ -60,8 +60,15 @@ nav > a:hover {
     text-underline-offset: 5px;
 }
 
-div {
+div.centralizar {
     width: 100%;
+
+    display: flex;
+    justify-content: center;
+}
+
+div.centralizar_secoes {
+    width: 50%;
 
     display: flex;
     justify-content: center;

@@ -1,4 +1,4 @@
-body{
+body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -18,6 +18,11 @@ body{
 
     text-align: center;
 }
+
+#grafico {
+    max-width: 800px;
+    margin: 35px auto;
+  }
 
 footer{
     margin-top: auto;
