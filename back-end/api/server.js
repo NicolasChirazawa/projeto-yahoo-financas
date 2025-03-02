@@ -1,4 +1,4 @@
-const { extrairInformacoes } = require('../main.js');
+const { desesnvolveGrafico } = require('../main.js');
 const cors = require('cors');
 
 const express = require('express');
@@ -9,11 +9,11 @@ const port = 3000;
 
 app.use(cors());
 
-app.get('/extracao/', async function(req, res){
+app.get('/estruturaGrafico/', async function(req, res){
     const teste = req.query.teste
     console.log(teste);
 
-    res.send(await extrairInformacoes());
+    res.send(await desesnvolveGrafico());
 });
 
 app.listen(port, () => {

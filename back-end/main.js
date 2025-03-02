@@ -253,4 +253,58 @@ async function extrairInformacoes(){
     return dados_tratados_acoes;
 }
 
-module.exports = { extrairInformacoes }; 
+function transformaGrafico(dados_tratados_acoes){
+    // { Descobrir se há como acrescentar uma descrição no ApexCharts }
+    
+    // Conteúdo do gráfico
+    let data = [];
+
+    for(let i = 0; i < dados_tratados_acoes.length; i++){
+        let formatacao_data_grafico = dados_tratados_acoes[i].data.split('-');
+        
+        // Mês, dia, ano
+        formatacao_data_grafico = formatacao_data_grafico[1] + '-' + formatacao_data_grafico[0] + '-' + formatacao_data_grafico[2];
+
+        data[i] = {
+            x: formatacao_data_grafico,
+            y: dados_tratados_acoes[i].fechamento
+        }
+    } 
+
+    let grafico = {
+        chart: {
+          type: 'line'
+        },
+        series: [
+          {
+            name: "Fechamento",
+            data: data
+          }
+        ],
+        xaxis: {
+          type: 'datetime',
+          title: {
+            text: 'Dia(s)'
+           }
+        },
+        yaxis: {
+            type: 'number',
+            title: {
+              text: `(${dados_tratados_acoes[0].sigla}) Dinheiro`
+             }
+        },
+        markers: {
+         size: 5
+        },
+    }
+
+    return grafico;
+}
+
+async function desesnvolveGrafico(){
+    let dados_tratados_acoes = await extrairInformacoes();
+    let grafico = transformaGrafico(dados_tratados_acoes);
+    return grafico;
+}
+
+module.exports = { desesnvolveGrafico }; 

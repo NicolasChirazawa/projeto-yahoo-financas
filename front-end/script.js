@@ -82,15 +82,27 @@ async function processoRequisicao(){
     const data_inicio = document.getElementById("data_inicio").value;
     const data_final = document.getElementById("data_final").value;
 
+    /*
     const mensagem_erro = validarCampos(acao, data_inicio, data_final);
 
     if(mensagem_erro != undefined) {         
         criarErro(mensagem_erro)
         return  
     }
+    */
+
+    const requisicao_back = await fetch('http://localhost:3000/estruturaGrafico?teste=Nick');
+
     
-    const requisicao_back = await fetch('http://localhost:3000/extracao?teste=Nick');
-    
-    let dados =  await requisicao_back.json();
-    console.log(dados);
+    let grafico_dados =  await requisicao_back.json();
+
+    // Teste funcionamento gráfico
+    let main = document.getElementsByTagName("main")[0];
+    let teste_div = document.createElement("div");
+    teste_div.setAttribute("id", "grafico");
+    main.appendChild(teste_div)
+
+    var grafico_front = new ApexCharts(document.querySelector("#grafico"), grafico_dados);
+
+    grafico_front.render();
 }
