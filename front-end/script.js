@@ -91,10 +91,17 @@ async function processoRequisicao(){
     }
     */
 
-    const requisicao_back = await fetch('http://localhost:3000/estruturaGrafico?teste=Nick');
+    const extrair_dados_acoes = await fetch('http://localhost:3000/extrairDados?teste=Nick');
 
-    
-    let grafico_dados =  await requisicao_back.json();
+    let dados_acoes = await extrair_dados_acoes.json();
+
+    const grafico_dados = await fetch(`http://localhost:3000/criarGrafico/`, {
+        headers: { 'Content-Type': 'application/json'},
+        method: "POST",
+        body: JSON.stringify(dados_acoes),
+    });
+
+    const grafico = await grafico_dados.json();
 
     // Teste funcionamento gráfico
     let main = document.getElementsByTagName("main")[0];
@@ -102,7 +109,7 @@ async function processoRequisicao(){
     teste_div.setAttribute("id", "grafico");
     main.appendChild(teste_div)
 
-    var grafico_front = new ApexCharts(document.querySelector("#grafico"), grafico_dados);
+    var grafico_front = new ApexCharts(document.querySelector("#grafico"), grafico);
 
     grafico_front.render();
 }

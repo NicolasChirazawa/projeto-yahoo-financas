@@ -215,7 +215,7 @@ function tratarDados(dados_brutos_acoes){
     return dados_tratados_acoes;
 }
 
-async function extrairInformacoes(){
+async function extrairDados(){
 
     const codigo_acao = 'AAPL';
 
@@ -244,7 +244,7 @@ async function extrairInformacoes(){
     let dados_tratados_acoes = tratarDados(dados_brutos_acoes);
 
     // Caso queira converter para dólar
-    let convercao_real = true;
+    let convercao_real = false;
 
     if(convercao_real){
         await converterDolar(dados_tratados_acoes, data);
@@ -253,13 +253,15 @@ async function extrairInformacoes(){
     return dados_tratados_acoes;
 }
 
-function transformaGrafico(dados_tratados_acoes){
+async function desesnvolveGrafico(dados_tratados_acoes){
     // { Descobrir se há como acrescentar uma descrição no ApexCharts }
-    
+    console.log(dados_tratados_acoes)
+
     // Conteúdo do gráfico
     let data = [];
 
     for(let i = 0; i < dados_tratados_acoes.length; i++){
+
         let formatacao_data_grafico = dados_tratados_acoes[i].data.split('-');
         
         // Mês, dia, ano
@@ -301,10 +303,4 @@ function transformaGrafico(dados_tratados_acoes){
     return grafico;
 }
 
-async function desesnvolveGrafico(){
-    let dados_tratados_acoes = await extrairInformacoes();
-    let grafico = transformaGrafico(dados_tratados_acoes);
-    return grafico;
-}
-
-module.exports = { desesnvolveGrafico }; 
+module.exports = { extrairDados, desesnvolveGrafico }; 

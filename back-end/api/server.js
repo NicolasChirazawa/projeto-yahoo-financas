@@ -1,4 +1,4 @@
-const { desesnvolveGrafico } = require('../main.js');
+const { extrairDados, desesnvolveGrafico } = require('../main.js');
 const cors = require('cors');
 
 const express = require('express');
@@ -9,11 +9,19 @@ const port = 3000;
 
 app.use(cors());
 
-app.get('/estruturaGrafico/', async function(req, res){
+app.get('/extrairDados/', async function(req, res){
     const teste = req.query.teste
     console.log(teste);
 
-    res.send(await desesnvolveGrafico());
+    res.send(await extrairDados());
+});
+
+// Transformar o JSON num 'req body'
+app.use(express.json())
+
+app.post('/criarGrafico/', async function(req, res){
+    const dados_acoes = req.body;
+    res.send(await desesnvolveGrafico(dados_acoes));
 });
 
 app.listen(port, () => {
