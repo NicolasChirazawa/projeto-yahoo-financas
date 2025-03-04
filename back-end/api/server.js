@@ -1,4 +1,4 @@
-const { extrairDados, desesnvolveGrafico } = require('../main.js');
+const { extrairDados, desesnvolveGrafico, analisarDados } = require('../main.js');
 const cors = require('cors');
 
 const express = require('express');
@@ -22,6 +22,11 @@ app.use(express.json())
 app.post('/criarGrafico/', async function(req, res){
     const dados_acoes = req.body;
     res.send(await desesnvolveGrafico(dados_acoes));
+});
+
+app.post('/criarTabela/', function(req, res){
+    const dados_acoes = req.body;
+    res.send(analisarDados(dados_acoes));
 });
 
 app.listen(port, () => {

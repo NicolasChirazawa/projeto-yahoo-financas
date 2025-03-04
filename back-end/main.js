@@ -244,7 +244,7 @@ async function extrairDados(){
     let dados_tratados_acoes = tratarDados(dados_brutos_acoes);
 
     // Caso queira converter para dólar
-    let convercao_real = false;
+    let convercao_real = true;
 
     if(convercao_real){
         await converterDolar(dados_tratados_acoes, data);
@@ -255,7 +255,6 @@ async function extrairDados(){
 
 async function desesnvolveGrafico(dados_tratados_acoes){
     // { Descobrir se há como acrescentar uma descrição no ApexCharts }
-    console.log(dados_tratados_acoes)
 
     // Conteúdo do gráfico
     let data = [];
@@ -303,4 +302,34 @@ async function desesnvolveGrafico(dados_tratados_acoes){
     return grafico;
 }
 
-module.exports = { extrairDados, desesnvolveGrafico }; 
+function analisarDados(dados_tratados_acoes) {
+    let maiorAcao;
+    let menorAcao;
+    let media = 0;
+
+    for(let i = 0; i < dados_tratados_acoes.length; i++){
+        if(maiorAcao == undefined || maiorAcao < dados_tratados_acoes[i].fechamento){
+            maiorAcao = dados_tratados_acoes[i].fechamento;
+        }
+
+        if(menorAcao == undefined || menorAcao > dados_tratados_acoes[i].fechamento){
+            menorAcao = dados_tratados_acoes[i].fechamento;
+        }
+
+        media += Number(dados_tratados_acoes[i].fechamento);
+    }
+
+    // Tratar media para o formato de apenas dois números após a vírgula
+    media = media / dados_tratados_acoes.length;
+    media = String(media).split('.')[0] + '.' + String(media).split('.')[1].slice(0, 2);
+
+    let dados_analisados = {
+        maiorAcao: dados_tratados_acoes[0].sigla + maiorAcao,
+        menorAcao: dados_tratados_acoes[0].sigla +  menorAcao,
+        media: dados_tratados_acoes[0].sigla + media
+    };
+    
+    return dados_analisados;
+}
+
+module.exports = { extrairDados, desesnvolveGrafico, analisarDados }; 

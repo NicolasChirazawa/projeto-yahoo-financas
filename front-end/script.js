@@ -103,13 +103,59 @@ async function processoRequisicao(){
 
     const grafico = await grafico_dados.json();
 
-    // Teste funcionamento gráfico
-    let main = document.getElementsByTagName("main")[0];
-    let teste_div = document.createElement("div");
-    teste_div.setAttribute("id", "grafico");
-    main.appendChild(teste_div)
+    // Adicionar 'div' para todos os dados sobre ações
+    const main = document.getElementsByTagName("main")[0];
+    const div_acoes = document.createElement("div");
+    div_acoes.setAttribute("id", "acoes")
+    main.appendChild(div_acoes);
 
-    var grafico_front = new ApexCharts(document.querySelector("#grafico"), grafico);
+    // Estruturar gráfico para criar no visual
+    const div_grafico = document.createElement("div");
+    div_grafico.setAttribute("id", "grafico");
+    div_acoes.appendChild(div_grafico)
 
+    const grafico_front = new ApexCharts(document.querySelector("#grafico"), grafico);
     grafico_front.render();
+
+    let tabela_dados = await fetch(`http://localhost:3000/criarTabela/`, {
+        headers: { 'Content-Type': 'application/json'},
+        method: "POST",
+        body: JSON.stringify(dados_acoes),
+    });
+
+    tabela_dados = await tabela_dados.json();
+    
+    tabela_dados = [
+        tabela_dados.maiorAcao,
+        tabela_dados.menorAcao,
+        tabela_dados.media
+    ];
+
+    tabela_nomes = [
+        'Maior ação:',
+        'Menor ação:',
+        'Média:'
+    ]
+
+    // Estruturar tabela para criar no visual
+    const div_tabela = document.createElement("div");
+    div_tabela.setAttribute("id", "tabela");
+    div_acoes.appendChild(div_tabela)
+
+    const COLUNAS = 3
+    for(let i = 0; i < COLUNAS; i++){
+        const div = document.createElement("div");
+        const paragrafo_titulo = document.createElement("p");
+        const paragrafo_texto = document.createElement("p");
+
+        paragrafo_titulo.innerText = tabela_nomes[i];
+        paragrafo_texto.innerText = tabela_dados[i];
+
+        paragrafo_titulo.setAttribute("class", "titulo-tabela");
+        paragrafo_texto.setAttribute("class", "texto-tabela");
+
+        div_tabela.appendChild(div);
+        div.appendChild(paragrafo_titulo);
+        div.appendChild(paragrafo_texto);
+    }
 }
