@@ -75,6 +75,66 @@ function criarErro(mensagem_erro){
     form.parentNode.insertBefore(div_erro, form.nextSibling);
 }
 
+async function requisitarDadosExtraidos(acao, data_inicio, data_final){
+    try {
+        const extrair_dados_acoes = await fetch('http://localhost:3000/extrairDados?teste=Nick');
+
+        if(extrair_dados_acoes.ok) {
+            return extrair_dados_acoes.json();
+        } else {
+            throw new Error(extrair_dados_acoes.status)
+        }
+    } catch (error) {
+        console.error('Fetch', error)
+        
+        return undefined;
+    }
+}
+
+async function requisitarDadosGrafico(dados_acoes){
+    try {
+        const grafico_dados = await fetch(`http://localhost:3000/criarGrafico/`, {
+            headers: { 'Content-Type': 'application/json'},
+            method: "POST",
+            body: JSON.stringify(dados_acoes),
+        });
+
+        if(grafico_dados.ok) {
+            return grafico_dados.json();
+        } else {
+            throw new Error(grafico_dados.status)
+        }
+    } catch (error) {
+        console.error('Fetch', error)
+        
+        return undefined;
+    }
+}
+
+function estruturarGrafico(){
+    
+}
+
+async function requisitarDadosTabela(dados_acoes){
+    try{
+        let tabela_dados = await fetch(`http://localhost:3000/criarTabela/`, {
+            headers: { 'Content-Type': 'application/json'},
+            method: "POST",
+            body: JSON.stringify(dados_acoes),
+        });
+
+        if(tabela_dados.ok){
+            return tabela_dados.json();
+        } else {
+            throw new Error(tabela_dados.status);
+        }
+    } catch(error) {
+        console.error('Fetch', error);
+
+        return undefined;
+    }
+}
+
 async function processoRequisicao(){
     deletarDivisaoErro();
 
@@ -91,25 +151,30 @@ async function processoRequisicao(){
     }
     */
 
-    const extrair_dados_acoes = await fetch('http://localhost:3000/extrairDados?teste=Nick');
+    // Requisição API Yahoo
+    const dados_acoes = await requisitarDadosExtraidos(acao, data_inicio, data_final);
 
-    let dados_acoes = await extrair_dados_acoes.json();
+    if(dados_acoes == undefined){
+        criarErro('Erro de conexão com a API');
+        return;
+    }
 
-    const grafico_dados = await fetch(`http://localhost:3000/criarGrafico/`, {
-        headers: { 'Content-Type': 'application/json'},
-        method: "POST",
-        body: JSON.stringify(dados_acoes),
-    });
+    const grafico = await requisitarDadosGrafico(dados_acoes);
 
-    const grafico = await grafico_dados.json();
+    if(grafico == undefined){
+        criarErro('Erro de conexão com a API');
+        return;
+    }
 
-    // Adicionar 'div' para todos os dados sobre ações
+    // Adicionar 'div' geral que recebe todos as seções: cabeçalho, gráfico e tabela
     const main = document.getElementsByTagName("main")[0];
     const div_acoes = document.createElement("div");
     div_acoes.setAttribute("id", "acoes")
     main.appendChild(div_acoes);
 
-    // Estruturar gráfico para criar no visual
+    
+
+    // Estruturar o visual do gráfico no front
     const div_grafico = document.createElement("div");
     div_grafico.setAttribute("id", "grafico");
     div_acoes.appendChild(div_grafico)
@@ -117,27 +182,21 @@ async function processoRequisicao(){
     const grafico_front = new ApexCharts(document.querySelector("#grafico"), grafico);
     grafico_front.render();
 
-    let tabela_dados = await fetch(`http://localhost:3000/criarTabela/`, {
-        headers: { 'Content-Type': 'application/json'},
-        method: "POST",
-        body: JSON.stringify(dados_acoes),
-    });
+    let objeto_dados = await requisitarDadosTabela(dados_acoes);
 
-    tabela_dados = await tabela_dados.json();
-    
-    tabela_dados = [
-        tabela_dados.maiorAcao,
-        tabela_dados.menorAcao,
-        tabela_dados.media
+    let tabela_dados = [
+        "maiorAcao", 
+        "menorAcao", 
+        "media"
     ];
 
-    tabela_nomes = [
+    let tabela_nomes = [
         'Maior ação:',
         'Menor ação:',
         'Média:'
     ]
 
-    // Estruturar tabela para criar no visual
+    // Estruturar o visual da tabela no front
     const div_tabela = document.createElement("div");
     div_tabela.setAttribute("id", "tabela");
     div_acoes.appendChild(div_tabela)
@@ -149,7 +208,7 @@ async function processoRequisicao(){
         const paragrafo_texto = document.createElement("p");
 
         paragrafo_titulo.innerText = tabela_nomes[i];
-        paragrafo_texto.innerText = tabela_dados[i];
+        paragrafo_texto.innerText = objeto_dados[`${tabela_dados[i]}`];
 
         paragrafo_titulo.setAttribute("class", "titulo-tabela");
         paragrafo_texto.setAttribute("class", "texto-tabela");
