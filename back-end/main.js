@@ -2,6 +2,37 @@ const { converterDolar } = require('./funcoes_opcionais.js');
 const { cotacaoDia, Erro } =  require('./classes.js')
 const yahooFinance = require('yahoo-finance2').default;
 
+function bancoLocal(){
+    // Banco em memória com algumas ações
+    const acoes = [
+        {
+            empresa: 'NVIDIA Corporation',
+            sigla: 'NVDA'
+        },
+        {
+            empresa: 'Ford Motor Company',
+            sigla: 'F'
+        },
+        {
+            empresa: 'Palantir Technologies Inc.',
+            sigla: 'PLTR'
+        },
+        {
+            empresa: 'Tesla Inc.',
+            sigla: 'TSLA'
+        },
+        {
+            empresa: 'Lucid Group Inc.',
+            sigla: 'LCID'
+        },
+        {
+            empresa: 'Intel Corporation',
+            sigla: 'NVDA'
+        }
+    ]
+    return acoes;
+}
+
 function calcularProximoDia(data){
     
     // Ano, mês e dia
@@ -332,4 +363,4 @@ function analisarDados(dados_tratados_acoes) {
     return dados_analisados;
 }
 
-module.exports = { extrairDados, desesnvolveGrafico, analisarDados }; 
+module.exports = { bancoLocal, extrairDados, desesnvolveGrafico, analisarDados }; 

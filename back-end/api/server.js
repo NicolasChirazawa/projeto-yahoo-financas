@@ -1,4 +1,4 @@
-const { extrairDados, desesnvolveGrafico, analisarDados } = require('../main.js');
+const { bancoLocal, extrairDados, desesnvolveGrafico, analisarDados } = require('../main.js');
 const cors = require('cors');
 
 const express = require('express');
@@ -8,6 +8,11 @@ const port = 3000;
 // const rotas = require('./rotas');
 
 app.use(cors());
+
+app.get('/enviarNomeAcoes', function(req, res){
+    console.log('teste');
+    res.send(bancoLocal());
+})
 
 app.get('/extrairDados/', async function(req, res){
     const teste = req.query.teste

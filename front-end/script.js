@@ -1,5 +1,20 @@
 let data_hoje;
 
+window.addEventListener("load", async () => {
+    const dados_acoes = await fetch('http://localhost:3000/enviarNomeAcoes').then((res) => res.json());
+    console.log(dados_acoes);
+
+    const lista_acoes = document.getElementById("lista_acoes");
+
+    for(let i = 0; i < dados_acoes.length; i++){
+        const acao = document.createElement("option");
+        acao.setAttribute("value", dados_acoes[i]["empresa"])
+        acao.innerText = dados_acoes[i]["sigla"];
+
+        lista_acoes.appendChild(acao);
+    }
+})
+
 function atribuirInputMax() {
     let hoje = new Date();
 
@@ -111,10 +126,6 @@ async function requisitarDadosGrafico(dados_acoes){
     }
 }
 
-function estruturarGrafico(){
-    
-}
-
 async function requisitarDadosTabela(dados_acoes){
     try{
         let tabela_dados = await fetch(`http://localhost:3000/criarTabela/`, {
@@ -171,8 +182,6 @@ async function processoRequisicao(){
     const div_acoes = document.createElement("div");
     div_acoes.setAttribute("id", "acoes")
     main.appendChild(div_acoes);
-
-    
 
     // Estruturar o visual do gráfico no front
     const div_grafico = document.createElement("div");

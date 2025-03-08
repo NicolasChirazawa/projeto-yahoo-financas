@@ -32,12 +32,22 @@
             - Id: Manipulação do valor e CSS 
         -->
         <form onsubmit="return false">
-            <input type="text" name="acao" id="acao">
-            <input type="date" name="data_inicio" id="data_inicio" required>
-            <input type="date" name="data_final" id="data_final" required>
-            <input type="radio" name="" id="">
-            <input type="radio" name="" id="">
-            <input type="submit" onclick="processoRequisicao()">
+            <label for="acao">Ação:</label>
+            <input type="search" list="lista_acoes" name="acao" id="acao" autocomplete="ON">
+            <datalist id="lista_acoes"></datalist>
+            <fieldset>
+                <legend>Período</legend>
+                <label for="data_inicio">Data inicial:</label>
+                <input type="date" name="data_inicio" id="data_inicio" required>
+                <label for="data_final">Data Final:</label>
+                <input type="date" name="data_final" id="data_final" required>
+            </fieldset>
+            <fieldset>
+                <legend>Moeda</legend>
+                <input type="radio" name="" id="">
+                <input type="radio" name="" id="">
+            </fieldset>
+            <input type="submit" onclick="">
         </form>
         
     </main>
