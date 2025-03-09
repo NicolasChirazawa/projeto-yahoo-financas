@@ -90,57 +90,22 @@ function criarErro(mensagem_erro){
     form.parentNode.insertBefore(div_erro, form.nextSibling);
 }
 
-async function requisitarDadosExtraidos(acao, data_inicio, data_final){
+async function requisitarDados(url, option) {
     try {
-        const extrair_dados_acoes = await fetch('http://localhost:3000/extrairDados?teste=Nick');
-
-        if(extrair_dados_acoes.ok) {
-            return extrair_dados_acoes.json();
+        let extrair_dados;
+        if(option == undefined) { 
+            extrair_dados = await fetch(url); 
         } else {
-            throw new Error(extrair_dados_acoes.status)
+            extrair_dados = await fetch(url, option);
+        }
+
+        if(extrair_dados.ok) {
+            return extrair_dados.json();
+        } else {
+            throw new Error(extrair_dados.status);
         }
     } catch (error) {
-        console.error('Fetch', error)
-        
-        return undefined;
-    }
-}
-
-async function requisitarDadosGrafico(dados_acoes){
-    try {
-        const grafico_dados = await fetch(`http://localhost:3000/criarGrafico/`, {
-            headers: { 'Content-Type': 'application/json'},
-            method: "POST",
-            body: JSON.stringify(dados_acoes),
-        });
-
-        if(grafico_dados.ok) {
-            return grafico_dados.json();
-        } else {
-            throw new Error(grafico_dados.status)
-        }
-    } catch (error) {
-        console.error('Fetch', error)
-        
-        return undefined;
-    }
-}
-
-async function requisitarDadosTabela(dados_acoes){
-    try{
-        let tabela_dados = await fetch(`http://localhost:3000/criarTabela/`, {
-            headers: { 'Content-Type': 'application/json'},
-            method: "POST",
-            body: JSON.stringify(dados_acoes),
-        });
-
-        if(tabela_dados.ok){
-            return tabela_dados.json();
-        } else {
-            throw new Error(tabela_dados.status);
-        }
-    } catch(error) {
-        console.error('Fetch', error);
+        console.log(error);
 
         return undefined;
     }
@@ -163,14 +128,22 @@ async function processoRequisicao(){
     */
 
     // Requisição API Yahoo
-    const dados_acoes = await requisitarDadosExtraidos(acao, data_inicio, data_final);
+    const url_acoes = 'http://localhost:3000/extrairDados?teste=Nick';
+    const dados_acoes = await requisitarDados(url_acoes);
 
     if(dados_acoes == undefined){
         criarErro('Erro de conexão com a API');
         return;
     }
 
-    const grafico = await requisitarDadosGrafico(dados_acoes);
+    const url_grafico = 'http://localhost:3000/criarGrafico/';
+    const option_grafico = {
+        headers: { 'Content-Type': 'application/json'},
+        method: "POST",
+        body: JSON.stringify(dados_acoes),
+    };
+
+    const grafico = await requisitarDados(url_grafico, option_grafico);
 
     if(grafico == undefined){
         criarErro('Erro de conexão com a API');
@@ -191,18 +164,24 @@ async function processoRequisicao(){
     const grafico_front = new ApexCharts(document.querySelector("#grafico"), grafico);
     grafico_front.render();
 
-    let objeto_dados = await requisitarDadosTabela(dados_acoes);
+    const url_objeto = 'http://localhost:3000/criarTabela/';
+    const option_objeto = {
+        headers: { 'Content-Type': 'application/json'},
+        method: "POST",
+        body: JSON.stringify(dados_acoes),
+    };
+    let objeto_dados = await requisitarDados(url_objeto, option_objeto);
 
     let tabela_dados = [
-        "maiorAcao", 
-        "menorAcao", 
-        "media"
+        "menorAcao",
+        "media",
+        "maiorAcao" 
     ];
 
     let tabela_nomes = [
-        'Maior ação:',
         'Menor ação:',
-        'Média:'
+        'Média:',
+        'Maior ação:'
     ]
 
     // Estruturar o visual da tabela no front
