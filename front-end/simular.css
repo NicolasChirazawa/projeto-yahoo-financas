@@ -4,6 +4,78 @@ body {
     flex-direction: column;
 }
 
+form {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#acao_div {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-size: 20px;
+}
+
+form > div > input {
+    width: 229px;
+    font-size: 16px;
+
+    border-radius: 5px;
+    margin: 15px 0;
+}
+
+fieldset {
+    width: 200px;
+    margin: 10px 0 10px 0;
+}
+
+legend {
+    font-size: 15px;
+}
+
+form > fieldset {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+form > fieldset > input {
+    font-size: 16px;
+    margin: 10px 0 10px 0;
+    border-radius: 5px;
+} 
+
+input#data_inicio, input#data_final {
+    width: 98.3%;
+} 
+
+fieldset#moeda {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+fieldset#moeda > div {
+    display: flex;
+}
+
+fieldset#moeda > div > input, fieldset#moeda > div > p {
+    margin: 5px;
+}
+
+fieldset > div > label {
+    font-size: 16px;
+}
+
+form > input {
+    font-size: 20px;
+    border-radius: 5px;
+}
+
 #erro_mensagem {
     background-color: #F07167;
     
