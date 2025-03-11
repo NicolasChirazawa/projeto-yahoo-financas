@@ -24,10 +24,6 @@ function bancoLocal(){
         {
             empresa: 'Lucid Group Inc.',
             sigla: 'LCID'
-        },
-        {
-            empresa: 'Intel Corporation',
-            sigla: 'NVDA'
         }
     ]
     return acoes;
@@ -284,6 +280,24 @@ async function extrairDados(){
     return dados_tratados_acoes;
 }
 
+function desenvolveCabecalho(sigla){
+    // Funciona usando o banco também
+
+    const acoes = {
+        NVDA: ['NVIDIA CORPORATION'],
+        F: ['Ford Motor Company'],
+        PLTR: ['Palantir Technologies Inc.'],
+        TSLA: ['Tesla Inc.'],
+        LCID: ['Lucid Group Inc.'],
+    }
+
+    if(acoes[sigla] == undefined) { 
+        return undefined 
+    } else {
+        return acoes[sigla];
+    }
+}
+
 async function desesnvolveGrafico(dados_tratados_acoes){
     // { Descobrir se há como acrescentar uma descrição no ApexCharts }
 
@@ -363,4 +377,4 @@ function analisarDados(dados_tratados_acoes) {
     return dados_analisados;
 }
 
-module.exports = { bancoLocal, extrairDados, desesnvolveGrafico, analisarDados }; 
+module.exports = { bancoLocal, extrairDados, desenvolveCabecalho, desesnvolveGrafico, analisarDados }; 

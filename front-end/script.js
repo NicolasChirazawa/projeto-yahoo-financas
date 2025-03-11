@@ -1,5 +1,8 @@
+const { response } = require("express");
+
 let data_hoje;
 
+// Carregamento dos dados das ações na datalist  
 window.addEventListener("load", async () => {
     const dados_acoes = await fetch('http://localhost:3000/enviarNomeAcoes').then((res) => res.json());
     console.log(dados_acoes);
@@ -136,6 +139,53 @@ async function processoRequisicao(){
         return;
     }
 
+    const url_cabecalho = 'http://localhost:3000/criarCabecalho?sigla=teste'
+    const dados_cabecalho = await requisitarDados(url_cabecalho);
+    console.log(dados_cabecalho);
+    
+    if(dados_cabecalho == undefined){
+        criarErro('Erro de conexão com a API');
+        return;
+    }
+
+    // Adicionar 'div' geral que recebe todos as seções: cabeçalho, gráfico e tabela
+    const main = document.getElementsByTagName("main")[0];
+    const div_acoes = document.createElement("div");
+    div_acoes.setAttribute("id", "acoes")
+    main.appendChild(div_acoes);
+
+    // Criar cabeçalho ação
+    const div_cabecalho = document.createElement("div");
+    div_cabecalho.setAttribute("id", "div_cabecalho");
+    div_acoes.appendChild(div_cabecalho);
+
+    const div_imagem_cabecalho = document.createElement("div");
+    div_imagem_cabecalho.setAttribute("id", "imagem");
+    const imagem_cabecalho = document.createElement("img");
+    
+    await fetch('http://localhost:3000/buscarLogo?sigla=nvda')
+    .then((response) => response.blob())
+    .then((myBlob) => { 
+        const imagem_URL = URL.createObjectURL(myBlob);
+        imagem_cabecalho.src = imagem_URL;
+    });
+
+    div_cabecalho.appendChild(div_imagem_cabecalho);
+    div_imagem_cabecalho.appendChild(imagem_cabecalho);
+
+    const div_nomes_cabecalho = document.createElement("div");
+    div_nomes_cabecalho.setAttribute("id", "acao_nomes");
+    const titulo_acao = document.createElement("p");
+    titulo_acao.setAttribute("id", "acao_titulo");
+    titulo_acao.innerText = "NVIDIA CORPORATION";
+    const sigla_acao = document.createElement("p");
+    sigla_acao.setAttribute("id", "acao_sigla")
+    sigla_acao.innerText = "(NVDA)";
+
+    div_cabecalho.appendChild(div_nomes_cabecalho);
+    div_nomes_cabecalho.appendChild(titulo_acao);
+    div_nomes_cabecalho.appendChild(sigla_acao);
+
     const url_grafico = 'http://localhost:3000/criarGrafico/';
     const option_grafico = {
         headers: { 'Content-Type': 'application/json'},
@@ -149,12 +199,6 @@ async function processoRequisicao(){
         criarErro('Erro de conexão com a API');
         return;
     }
-
-    // Adicionar 'div' geral que recebe todos as seções: cabeçalho, gráfico e tabela
-    const main = document.getElementsByTagName("main")[0];
-    const div_acoes = document.createElement("div");
-    div_acoes.setAttribute("id", "acoes")
-    main.appendChild(div_acoes);
 
     // Estruturar o visual do gráfico no front
     const div_grafico = document.createElement("div");
