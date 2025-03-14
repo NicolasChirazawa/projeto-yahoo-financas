@@ -83,6 +83,8 @@ function converterAcaoReal(dados_acoes, data_cotacao){
         dados_acoes[i].fechamento = dado_fechamento_nao_tratado[0] + '.' + dado_fechamento_nao_tratado[1].slice(0, 2);
         dados_acoes[i].sigla = 'R$';
     }
+
+    return dados_acoes;
 }
 
 async function converterDolar(dados_acoes, data) {
@@ -107,7 +109,8 @@ async function converterDolar(dados_acoes, data) {
     // Pega o primeiro resultado disponível (sempre haverá, foi feito o teste 'verificacaoCotacaoResultado()' para confirmar).
     if(data_cotacao == '') { data_cotacao = dados_brutos_cotacao.value[0].cotacaoCompra }
 
-    converterAcaoReal(dados_acoes, data_cotacao);
+    let dados_cotacao_real = converterAcaoReal(dados_acoes, data_cotacao);
+    return dados_cotacao_real;
 }
 
 module.exports = { converterDolar }

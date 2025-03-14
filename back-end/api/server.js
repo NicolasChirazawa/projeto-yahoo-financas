@@ -11,13 +11,11 @@ const path = require('path');
 app.use(cors());
 
 app.get('/enviarNomeAcoes', function(req, res){
-    console.log('teste');
     res.send(bancoLocal());
 })
 
 app.get('/extrairDados/', async function(req, res){
-    const teste = req.query.teste
-    console.log(teste);
+    const teste = req.query.teste;
 
     res.send(await extrairDados());
 });

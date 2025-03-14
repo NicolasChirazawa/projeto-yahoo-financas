@@ -1,7 +1,3 @@
-const { response } = require("express");
-
-let data_hoje;
-
 // Carregamento dos dados das ações na datalist  
 window.addEventListener("load", async () => {
     const dados_acoes = await fetch('http://localhost:3000/enviarNomeAcoes').then((res) => res.json());
@@ -18,12 +14,11 @@ window.addEventListener("load", async () => {
     }
 })
 
-function atribuirInputMax() {
+function descobrirDiaHoje(){
     let hoje = new Date();
 
     let dia = hoje.getDate();
     let mes = hoje.getMonth() + 1; 
-
 
     if (dia < 10){
         dia = '0' + '' + dia; 
@@ -33,24 +28,53 @@ function atribuirInputMax() {
     }
 
     hoje = hoje.getFullYear() + '-' + mes + '-' + dia;
-
-    document.getElementById("data_inicio").setAttribute('max', hoje);
-    document.getElementById("data_final").setAttribute('max', hoje);
-
-    data_hoje = hoje;
+    return hoje;
 }
 
-function deletarDivisaoErro(){
-    let divisao_erros = document.getElementById("erro_mensagem") ?? undefined;
+function atribuirInputMax() {
+    data_hoje = descobrirDiaHoje();
+
+    document.getElementById("data_inicio").setAttribute('max', data_hoje);
+    document.getElementById("data_final").setAttribute('max', data_hoje);
+}
+
+function descobrirDiaHoje(){
+    let hoje = new Date();
+
+    let dia = hoje.getDate();
+    let mes = hoje.getMonth() + 1; 
+
+    if (dia < 10){
+        dia = '0' + '' + dia; 
+    }
+    if (mes < 10){
+        mes = '0' + '' + mes; 
+    }
+
+    hoje = hoje.getFullYear() + '-' + mes + '-' + dia;
+    return hoje;
+}
+
+function deletarDivErro(){
+    const divisao_erros = document.getElementById("erro_mensagem") ?? undefined;
 
     if(divisao_erros != undefined){
-        let main = document.getElementsByTagName("main")[0];
-
+        const main = document.getElementsByTagName("main")[0];
         main.removeChild(divisao_erros);
     }
 }
 
+function deletarDivAcao(){
+    const div_acao = document.getElementById("acoes") ?? undefined;
+
+    if(div_acao != undefined){
+        const main = document.getElementsByTagName("main")[0];
+        main.removeChild(div_acao);
+    }
+}
+
 function validarCampos(acao, data_inicio, data_final) {
+    let data_hoje = descobrirDiaHoje();
     let mensagem_erro = '';
 
     // Verificações
@@ -93,6 +117,88 @@ function criarErro(mensagem_erro){
     form.parentNode.insertBefore(div_erro, form.nextSibling);
 }
 
+async function estruturaCabecalho(div_acao){
+    const div_cabecalho = document.createElement("div");
+    div_cabecalho.setAttribute("id", "div_cabecalho");
+    div_acao.appendChild(div_cabecalho);
+
+    const div_imagem_cabecalho = document.createElement("div");
+    div_imagem_cabecalho.setAttribute("id", "imagem");
+    const imagem_cabecalho = document.createElement("img");
+    
+    let imagem_sigla;
+
+    try{
+        imagem_sigla = await fetch('http://localhost:3000/buscarLogo?sigla=nvda')
+        .then((response) => response.blob());
+    } catch(e) {
+        console.error(e);
+        return undefined;
+    }
+
+    const imagem_URL = URL.createObjectURL(imagem_sigla);
+    imagem_cabecalho.src = imagem_URL;
+
+    div_cabecalho.appendChild(div_imagem_cabecalho);
+    div_imagem_cabecalho.appendChild(imagem_cabecalho);
+
+    const div_nomes_cabecalho = document.createElement("div");
+    div_nomes_cabecalho.setAttribute("id", "acao_nomes");
+    const titulo_acao = document.createElement("p");
+    titulo_acao.setAttribute("id", "acao_titulo");
+    titulo_acao.innerText = "NVIDIA CORPORATION";
+    const sigla_acao = document.createElement("p");
+    sigla_acao.setAttribute("id", "acao_sigla")
+    sigla_acao.innerText = "(NVDA)";
+
+    div_cabecalho.appendChild(div_nomes_cabecalho);
+    div_nomes_cabecalho.appendChild(titulo_acao);
+    div_nomes_cabecalho.appendChild(sigla_acao);
+}
+
+function estruturarGrafico(div_acao){
+    // Estruturar o visual do gráfico no front
+    const div_grafico = document.createElement("div");
+    div_grafico.setAttribute("id", "grafico");
+    div_acao.appendChild(div_grafico);
+}
+
+function estruturarTabela(div_acao, objeto_dados){
+    let tabela_dados = [
+        "menorAcao",
+        "media",
+        "maiorAcao" 
+    ];
+
+    let tabela_nomes = [
+        'Menor ação:',
+        'Média:',
+        'Maior ação:'
+    ]
+
+    // Estruturar o visual da tabela no front
+    const div_tabela = document.createElement("div");
+    div_tabela.setAttribute("id", "tabela");
+    div_acao.appendChild(div_tabela)
+
+    const COLUNAS = 3
+    for(let i = 0; i < COLUNAS; i++){
+        const div = document.createElement("div");
+        const paragrafo_titulo = document.createElement("p");
+        const paragrafo_texto = document.createElement("p");
+
+        paragrafo_titulo.innerText = tabela_nomes[i];
+        paragrafo_texto.innerText = objeto_dados[`${tabela_dados[i]}`];
+
+        paragrafo_titulo.setAttribute("class", "titulo-tabela");
+        paragrafo_texto.setAttribute("class", "texto-tabela");
+
+        div_tabela.appendChild(div);
+        div.appendChild(paragrafo_titulo);
+        div.appendChild(paragrafo_texto);
+    }
+}
+
 async function requisitarDados(url, option) {
     try {
         let extrair_dados;
@@ -114,10 +220,17 @@ async function requisitarDados(url, option) {
     }
 }
 
+// Funções principais;
 async function processoRequisicao(){
-    deletarDivisaoErro();
+    
+    // Bloqueia o botão até primeira pesquisa da API, não permitindo um spam;
+    const extrairBotao = document.getElementById("extrator");
+    extrairBotao.setAttribute("disabled", true);
 
-    const acao = document.getElementById("acao").value;
+    deletarDivErro();
+    deletarDivAcao();
+
+    const acao = document.getElementById("acao").value.toUpperCase();
     const data_inicio = document.getElementById("data_inicio").value;
     const data_final = document.getElementById("data_final").value;
 
@@ -133,6 +246,8 @@ async function processoRequisicao(){
     // Requisição API Yahoo
     const url_acoes = 'http://localhost:3000/extrairDados?teste=Nick';
     const dados_acoes = await requisitarDados(url_acoes);
+
+    extrairBotao.removeAttribute("disabled");
 
     if(dados_acoes == undefined){
         criarErro('Erro de conexão com a API');
@@ -150,41 +265,11 @@ async function processoRequisicao(){
 
     // Adicionar 'div' geral que recebe todos as seções: cabeçalho, gráfico e tabela
     const main = document.getElementsByTagName("main")[0];
-    const div_acoes = document.createElement("div");
-    div_acoes.setAttribute("id", "acoes")
-    main.appendChild(div_acoes);
+    const div_acao = document.createElement("div");
+    div_acao.setAttribute("id", "acoes")
+    main.appendChild(div_acao);
 
-    // Criar cabeçalho ação
-    const div_cabecalho = document.createElement("div");
-    div_cabecalho.setAttribute("id", "div_cabecalho");
-    div_acoes.appendChild(div_cabecalho);
-
-    const div_imagem_cabecalho = document.createElement("div");
-    div_imagem_cabecalho.setAttribute("id", "imagem");
-    const imagem_cabecalho = document.createElement("img");
-    
-    await fetch('http://localhost:3000/buscarLogo?sigla=nvda')
-    .then((response) => response.blob())
-    .then((myBlob) => { 
-        const imagem_URL = URL.createObjectURL(myBlob);
-        imagem_cabecalho.src = imagem_URL;
-    });
-
-    div_cabecalho.appendChild(div_imagem_cabecalho);
-    div_imagem_cabecalho.appendChild(imagem_cabecalho);
-
-    const div_nomes_cabecalho = document.createElement("div");
-    div_nomes_cabecalho.setAttribute("id", "acao_nomes");
-    const titulo_acao = document.createElement("p");
-    titulo_acao.setAttribute("id", "acao_titulo");
-    titulo_acao.innerText = "NVIDIA CORPORATION";
-    const sigla_acao = document.createElement("p");
-    sigla_acao.setAttribute("id", "acao_sigla")
-    sigla_acao.innerText = "(NVDA)";
-
-    div_cabecalho.appendChild(div_nomes_cabecalho);
-    div_nomes_cabecalho.appendChild(titulo_acao);
-    div_nomes_cabecalho.appendChild(sigla_acao);
+    await estruturaCabecalho(div_acao);
 
     const url_grafico = 'http://localhost:3000/criarGrafico/';
     const option_grafico = {
@@ -193,19 +278,16 @@ async function processoRequisicao(){
         body: JSON.stringify(dados_acoes),
     };
 
-    const grafico = await requisitarDados(url_grafico, option_grafico);
+    const grafico_dados = await requisitarDados(url_grafico, option_grafico);
 
-    if(grafico == undefined){
+    if(grafico_dados == undefined){
         criarErro('Erro de conexão com a API');
         return;
     }
 
-    // Estruturar o visual do gráfico no front
-    const div_grafico = document.createElement("div");
-    div_grafico.setAttribute("id", "grafico");
-    div_acoes.appendChild(div_grafico)
+    estruturarGrafico(div_acao);
 
-    const grafico_front = new ApexCharts(document.querySelector("#grafico"), grafico);
+    const grafico_front = new ApexCharts(document.querySelector("#grafico"), grafico_dados);
     grafico_front.render();
 
     const url_objeto = 'http://localhost:3000/criarTabela/';
@@ -214,39 +296,8 @@ async function processoRequisicao(){
         method: "POST",
         body: JSON.stringify(dados_acoes),
     };
+    
     let objeto_dados = await requisitarDados(url_objeto, option_objeto);
 
-    let tabela_dados = [
-        "menorAcao",
-        "media",
-        "maiorAcao" 
-    ];
-
-    let tabela_nomes = [
-        'Menor ação:',
-        'Média:',
-        'Maior ação:'
-    ]
-
-    // Estruturar o visual da tabela no front
-    const div_tabela = document.createElement("div");
-    div_tabela.setAttribute("id", "tabela");
-    div_acoes.appendChild(div_tabela)
-
-    const COLUNAS = 3
-    for(let i = 0; i < COLUNAS; i++){
-        const div = document.createElement("div");
-        const paragrafo_titulo = document.createElement("p");
-        const paragrafo_texto = document.createElement("p");
-
-        paragrafo_titulo.innerText = tabela_nomes[i];
-        paragrafo_texto.innerText = objeto_dados[`${tabela_dados[i]}`];
-
-        paragrafo_titulo.setAttribute("class", "titulo-tabela");
-        paragrafo_texto.setAttribute("class", "texto-tabela");
-
-        div_tabela.appendChild(div);
-        div.appendChild(paragrafo_titulo);
-        div.appendChild(paragrafo_texto);
-    }
+    estruturarTabela(div_acao, objeto_dados)
 }

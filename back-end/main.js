@@ -185,7 +185,6 @@ function tratarDados(dados_brutos_acoes){
 
     for(let i = 0; i < dados_brutos_acoes.quotes.length; i++){
 
-        // Monta a estrutura para tratar os dados coletados pela API
         const dados_estruturados = [
             dados_brutos_acoes.quotes[i].date,
             String(dados_brutos_acoes.quotes[i].high), 
@@ -200,18 +199,18 @@ function tratarDados(dados_brutos_acoes){
         for(let i = 1; i < (QUANTIDADE_OPERACOES + 1); i++){
             let numeroDecimal = false
     
-            // Descobrir se o número é quebrado
+            // Descobrir se o número é decimal
             for(let j = 0; j < dados_estruturados[i]; j++){
                 if(dados_estruturados[i][j] == '.'){
                     numeroDecimal = true;
                     break;
                 } else if (j == (dados_estruturados[i].length - 1)){
-                    // Caso ele não seja decimal, acrescenta 
+                    // Caso ele não seja decimal, acrescenta as casas decimais 
                     dados_estruturados[i] = dados_estruturados[i] + '.00';
                 }
             }
     
-            // Pegar duas casas decimais
+            // Tratar números para voltar apenas duas casas decimais
             if(numeroDecimal == true){
                 let tratamento = dados_estruturados[i].split('.');
                 tratamento[1] = tratamento[1].slice(0, 2);
@@ -244,11 +243,11 @@ function tratarDados(dados_brutos_acoes){
 
 async function extrairDados(){
 
-    const codigo_acao = 'AAPL';
+    const codigo_acao = 'NVDA';
 
     const data = {
         // Ano, mês, dia
-        data_inicial: '2025-01-03',
+        data_inicial: '2023-01-03',
         data_final: '2025-01-31'
     }
 
@@ -260,13 +259,13 @@ async function extrairDados(){
 
     // Verifica se as datas inseridas são válidas
     let dataInvalida = verificacaoData(data);
-    if(dataInvalida == true){ return }
+    if(dataInvalida == true){ return undefined }
 
     let periodo = {period1: data.data_inicial, period2: data.data_final};
     const dados_brutos_acoes = await yahooFinance.chart(codigo_acao, periodo);
 
     let naoEncontrouAcoes = verificacaoAcaoResultado(dados_brutos_acoes);
-    if(naoEncontrouAcoes == true){ return }
+    if(naoEncontrouAcoes == true){ return undefined }
 
     let dados_tratados_acoes = tratarDados(dados_brutos_acoes);
 
@@ -274,7 +273,7 @@ async function extrairDados(){
     let convercao_real = true;
 
     if(convercao_real){
-        await converterDolar(dados_tratados_acoes, data);
+        dados_tratados_acoes = await converterDolar(dados_tratados_acoes, data);
     }
 
     return dados_tratados_acoes;
@@ -339,9 +338,6 @@ async function desesnvolveGrafico(dados_tratados_acoes){
               text: `(${dados_tratados_acoes[0].sigla}) Dinheiro`
              }
         },
-        markers: {
-         size: 5
-        },
     }
 
     return grafico;
@@ -353,12 +349,13 @@ function analisarDados(dados_tratados_acoes) {
     let media = 0;
 
     for(let i = 0; i < dados_tratados_acoes.length; i++){
-        if(maiorAcao == undefined || maiorAcao < dados_tratados_acoes[i].fechamento){
-            maiorAcao = dados_tratados_acoes[i].fechamento;
+        console.log(dados_tratados_acoes[i]);
+        if(maiorAcao == undefined || maiorAcao < Number(dados_tratados_acoes[i].fechamento)){
+            maiorAcao = Number(dados_tratados_acoes[i].fechamento);
         }
 
-        if(menorAcao == undefined || menorAcao > dados_tratados_acoes[i].fechamento){
-            menorAcao = dados_tratados_acoes[i].fechamento;
+        if(menorAcao == undefined || menorAcao > Number(dados_tratados_acoes[i].fechamento)){
+            menorAcao = Number(dados_tratados_acoes[i].fechamento);
         }
 
         media += Number(dados_tratados_acoes[i].fechamento);
@@ -373,7 +370,7 @@ function analisarDados(dados_tratados_acoes) {
         menorAcao: dados_tratados_acoes[0].sigla +  menorAcao,
         media: dados_tratados_acoes[0].sigla + media
     };
-    
+
     return dados_analisados;
 }
 
