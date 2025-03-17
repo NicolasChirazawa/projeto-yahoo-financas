@@ -29,15 +29,64 @@ function bancoLocal(){
     return acoes;
 }
 
+function verificacaoData(data) {
+    let codigo_erro;
+    let erro;
+
+    try{
+        if(data.data_inicial == '') {
+            codigo_erro = '001';
+
+            erro = new Erro(codigo_erro);
+            throw new Error(erro);
+        } 
+    
+        if(data.data_final == ''){
+            codigo_erro = '002';
+
+            erro = new Erro(codigo_erro);
+            throw new Error(erro);
+        }
+    
+        // Pega o dia de hoje
+        let dia_atual = new Date().toLocaleString();
+    
+        // Transcrever a data comum dd/mm/yyyy -> yyyy/mm/dd
+        dia_atual = dia_atual.split(',')[0].split('/');
+        dia_atual = Number(dia_atual[2] + dia_atual[1] + dia_atual[0]);
+    
+        let primeira_data = Number(data.data_inicial.split('-').join(''));
+        let segunda_data = Number(data.data_final.split('-').join(''));
+    
+        if(dia_atual < primeira_data) { codigo_erro = '003' } 
+        
+        if(dia_atual < segunda_data) { codigo_erro = '004' } 
+        
+        if(primeira_data > segunda_data) { codigo_erro = '005' }
+
+        if(codigo_erro != undefined){
+            erro = new Erro(codigo_erro);
+            throw new Error(erro);
+        }
+
+        return {
+            message: '',
+            status: false
+        };
+    } catch {
+        console.log(erro.lancarMensagem());
+        return {
+            message: erro.lancarMensagem(),
+            status: true
+        };
+    }
+}
+
 function calcularProximoDia(data){
     
     // Ano, mês e dia
-    const dataSeparada = data.data_inicial.split('-');
-
-    // Caso o mês venha com 'leading zero'
-    if(dataSeparada[1][0] == '0'){
-        dataSeparada[1] = dataSeparada[1].slice(1);
-    }
+    const dataSeparada = data.data_final.split
+    ('-').map((res) => Number(res));
 
     const diaFinalMeses = {
         1: 31,
@@ -63,13 +112,13 @@ function calcularProximoDia(data){
 
         // Mudar de mês
         if(diaFinalMeses[dataSeparada[1]] == dataSeparada[2]){
-            dataSeparada[2] = '1';
+            dataSeparada[2] = 1;
             dataSeparada[1]++;
         }
 
         // Mudar ano
-        if(dataSeparada[1] > '12'){
-            dataSeparada[1] = '1';
+        if(dataSeparada[1] > 12){
+            dataSeparada[1] = 1;
             dataSeparada[0]++;
         }
 
@@ -124,44 +173,6 @@ function calcularProximoDia(data){
     return data.data_final;
 }
 
-function verificacaoData(data) {
-    let codigo_erro;
-
-    // Pega o dia de hoje
-    let dia_atual = new Date().toLocaleString();
-
-    // Transcrever a data comum dd/mm/yyyy -> yyyy/mm/dd
-    dia_atual = dia_atual.split(',')[0].split('/');
-    dia_atual = Number(dia_atual[2] + dia_atual[1] + dia_atual[0]);
-
-    let primeira_data = Number(data.data_inicial.split('-').join(''));
-    let segunda_data = Number(data.data_final.split('-').join(''));
-
-    if(dia_atual < primeira_data) {
-        codigo_erro = '001';
-
-    } else if(dia_atual < segunda_data) {
-        codigo_erro = '002';
-    
-    } else if(primeira_data > segunda_data) {
-        codigo_erro = '003';
-    }
-
-    let erro;
-
-    try {
-        if(codigo_erro != undefined){
-            erro = new Erro(codigo_erro);
-            throw new Error(erro);
-        }
-        return false;
-
-    } catch {
-        console.log(erro.lancarMensagem());
-        return true;
-    }
-}
-
 function verificacaoAcaoResultado(dados_brutos_acoes) {
     let codigo_erro;
     let erro;
@@ -172,10 +183,17 @@ function verificacaoAcaoResultado(dados_brutos_acoes) {
             erro = new Erro(codigo_erro)
             throw new Error(erro);
         }
-        return false;
+
+        return {
+            status: false,
+            message: ''
+        }
     } catch {
         console.log(erro.lancarMensagem());
-        return true;
+        return {
+            status: true,
+            message: erro
+        }
     }
 }
 
@@ -241,14 +259,20 @@ function tratarDados(dados_brutos_acoes){
     return dados_tratados_acoes;
 }
 
-async function extrairDados(){
+async function extrairDados(sigla, data_inicial_requisicao, data_final_requisicao){
 
-    const codigo_acao = 'NVDA';
+    const codigo_acao = sigla;
 
     const data = {
         // Ano, mês, dia
-        data_inicial: '2023-01-03',
-        data_final: '2025-01-31'
+        data_inicial: data_inicial_requisicao,
+        data_final: data_final_requisicao
+    }
+
+    // Verifica se as datas inseridas são válidas
+    let dataInvalida = verificacaoData(data);
+    if(dataInvalida.status == true) { 
+        return dataInvalida.message;
     }
 
     // De acordo com a documentação da API, o dia inicial e final não podem ser iguais. Por conta disso, é necessário pular um dia;
@@ -257,15 +281,19 @@ async function extrairDados(){
         data.data_final = calcularProximoDia(data);
     }
 
-    // Verifica se as datas inseridas são válidas
-    let dataInvalida = verificacaoData(data);
-    if(dataInvalida == true){ return undefined }
-
     let periodo = {period1: data.data_inicial, period2: data.data_final};
-    const dados_brutos_acoes = await yahooFinance.chart(codigo_acao, periodo);
+
+    let dados_brutos_acoes;
+    try {
+        dados_brutos_acoes = await yahooFinance.chart(codigo_acao, periodo);
+    } catch {
+        return new Erro('006').lancarMensagem();
+    }
 
     let naoEncontrouAcoes = verificacaoAcaoResultado(dados_brutos_acoes);
-    if(naoEncontrouAcoes == true){ return undefined }
+    if(naoEncontrouAcoes.status == true) { 
+        return naoEncontrouAcoes.message;
+    }
 
     let dados_tratados_acoes = tratarDados(dados_brutos_acoes);
 
@@ -279,21 +307,21 @@ async function extrairDados(){
     return dados_tratados_acoes;
 }
 
-function desenvolveCabecalho(sigla){
+function desenvolveCabecalho(sigla) {
     // Funciona usando o banco também
 
     const acoes = {
-        NVDA: ['NVIDIA CORPORATION'],
-        F: ['Ford Motor Company'],
-        PLTR: ['Palantir Technologies Inc.'],
-        TSLA: ['Tesla Inc.'],
-        LCID: ['Lucid Group Inc.'],
+        NVDA: {sigla: 'NVDA', acao_nome: 'NVIDIA Corporation'},
+        F: {sigla: 'F', acao_nome: 'Ford Motor Company'},
+        PLTR: {sigla: 'PLTR', acao_nome: 'Palantir Technologies Inc.'},
+        TSLA: {sigla: 'TSLA', acao_nome: 'Tesla, Inc.'},
+        LCID: {sigla: 'LCID', acao_nome: 'Lucid Group, Inc.'},
     }
 
     if(acoes[sigla] == undefined) { 
-        return undefined 
+        return new Erro('013').lancarMensagem(); 
     } else {
-        return acoes[sigla];
+        return { acao: acoes[sigla] };
     }
 }
 
@@ -349,7 +377,6 @@ function analisarDados(dados_tratados_acoes) {
     let media = 0;
 
     for(let i = 0; i < dados_tratados_acoes.length; i++){
-        console.log(dados_tratados_acoes[i]);
         if(maiorAcao == undefined || maiorAcao < Number(dados_tratados_acoes[i].fechamento)){
             maiorAcao = Number(dados_tratados_acoes[i].fechamento);
         }
@@ -361,14 +388,15 @@ function analisarDados(dados_tratados_acoes) {
         media += Number(dados_tratados_acoes[i].fechamento);
     }
 
-    // Tratar media para o formato de apenas dois números após a vírgula
     media = media / dados_tratados_acoes.length;
+    // Tratar para o formato de apenas dois números após a vírgula
     media = String(media).split('.')[0] + '.' + String(media).split('.')[1].slice(0, 2);
 
+
     let dados_analisados = {
-        maiorAcao: dados_tratados_acoes[0].sigla + maiorAcao,
-        menorAcao: dados_tratados_acoes[0].sigla +  menorAcao,
-        media: dados_tratados_acoes[0].sigla + media
+        maiorAcao: dados_tratados_acoes[0].sigla + Number(maiorAcao),
+        menorAcao: dados_tratados_acoes[0].sigla +  Number(menorAcao),
+        media: dados_tratados_acoes[0].sigla + Number(media)
     };
 
     return dados_analisados;

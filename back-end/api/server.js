@@ -15,14 +15,30 @@ app.get('/enviarNomeAcoes', function(req, res){
 })
 
 app.get('/extrairDados/', async function(req, res){
-    const teste = req.query.teste;
+    const sigla = req.query.sigla;
+    const data_inicial = req.query.data_inicial;
+    const data_final = req.query.data_final;
 
-    res.send(await extrairDados());
+    const requisicao = await extrairDados(sigla, data_inicial, data_final);
+
+    if(typeof requisicao == 'string') { 
+        res.status(400).send({statusText: requisicao})
+    } else {
+        res.send(requisicao);
+    }
 });
 
 app.get('/criarCabecalho/', function(req, res) {
     const sigla = req.query.sigla;
-    res.send(desenvolveCabecalho('NVDA'));
+
+    const cabecalho = desenvolveCabecalho(sigla);
+
+    if(typeof cabecalho == 'string'){
+        res.status(404);
+        res.send({statusText: cabecalho})
+    } else {
+        res.send(JSON.stringify(cabecalho.acao));
+    }
 });
 
 // Transformar o JSON num 'req body'

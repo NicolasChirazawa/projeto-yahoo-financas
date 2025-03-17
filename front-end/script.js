@@ -1,14 +1,13 @@
 // Carregamento dos dados das ações na datalist  
 window.addEventListener("load", async () => {
     const dados_acoes = await fetch('http://localhost:3000/enviarNomeAcoes').then((res) => res.json());
-    console.log(dados_acoes);
 
     const lista_acoes = document.getElementById("lista_acoes");
 
     for(let i = 0; i < dados_acoes.length; i++){
         const acao = document.createElement("option");
-        acao.setAttribute("value", dados_acoes[i]["empresa"])
-        acao.innerText = dados_acoes[i]["sigla"];
+        acao.setAttribute("value", dados_acoes[i]["sigla"])
+        acao.innerText = dados_acoes[i]["empresa"];
 
         lista_acoes.appendChild(acao);
     }
@@ -117,7 +116,7 @@ function criarErro(mensagem_erro){
     form.parentNode.insertBefore(div_erro, form.nextSibling);
 }
 
-async function estruturaCabecalho(div_acao){
+async function estruturaCabecalho(div_acao, acao){
     const div_cabecalho = document.createElement("div");
     div_cabecalho.setAttribute("id", "div_cabecalho");
     div_acao.appendChild(div_cabecalho);
@@ -129,11 +128,10 @@ async function estruturaCabecalho(div_acao){
     let imagem_sigla;
 
     try{
-        imagem_sigla = await fetch('http://localhost:3000/buscarLogo?sigla=nvda')
+        imagem_sigla = await fetch(`http://localhost:3000/buscarLogo?sigla=${acao.sigla}`)
         .then((response) => response.blob());
-    } catch(e) {
-        console.error(e);
-        return undefined;
+    } catch {
+        return;
     }
 
     const imagem_URL = URL.createObjectURL(imagem_sigla);
@@ -146,10 +144,10 @@ async function estruturaCabecalho(div_acao){
     div_nomes_cabecalho.setAttribute("id", "acao_nomes");
     const titulo_acao = document.createElement("p");
     titulo_acao.setAttribute("id", "acao_titulo");
-    titulo_acao.innerText = "NVIDIA CORPORATION";
+    titulo_acao.innerText = `${acao.acao_nome}`;
     const sigla_acao = document.createElement("p");
     sigla_acao.setAttribute("id", "acao_sigla")
-    sigla_acao.innerText = "(NVDA)";
+    sigla_acao.innerText = `(${acao.sigla})`;
 
     div_cabecalho.appendChild(div_nomes_cabecalho);
     div_nomes_cabecalho.appendChild(titulo_acao);
@@ -200,8 +198,9 @@ function estruturarTabela(div_acao, objeto_dados){
 }
 
 async function requisitarDados(url, option) {
+    let extrair_dados;
+
     try {
-        let extrair_dados;
         if(option == undefined) { 
             extrair_dados = await fetch(url); 
         } else {
@@ -214,9 +213,15 @@ async function requisitarDados(url, option) {
             throw new Error(extrair_dados.status);
         }
     } catch (error) {
-        console.log(error);
+        console.log('Cliente side: ' + error);
 
-        return undefined;
+        // Ter ocorrido a requisição, neste caso, mal sucedida;
+        if(extrair_dados?.ok == false){
+            criarErro((await extrair_dados.json()).statusText)
+            return undefined;
+        } else {
+            criarErro('Erro na conexão com a API');
+        }
     }
 }
 
@@ -243,25 +248,19 @@ async function processoRequisicao(){
     }
     */
 
-    // Requisição API Yahoo
-    const url_acoes = 'http://localhost:3000/extrairDados?teste=Nick';
+    const url_acoes = `http://localhost:3000/extrairDados/?sigla=${acao}&data_inicial=${data_inicio}&data_final=${data_final}`;
     const dados_acoes = await requisitarDados(url_acoes);
 
     extrairBotao.removeAttribute("disabled");
 
-    if(dados_acoes == undefined){
-        criarErro('Erro de conexão com a API');
+    if(dados_acoes == undefined) { return }
+    if(dados_acoes.length == 0) { 
+        criarErro('Não há ações com essa empresa nesse período indicado');
         return;
     }
 
-    const url_cabecalho = 'http://localhost:3000/criarCabecalho?sigla=teste'
+    const url_cabecalho = `http://localhost:3000/criarCabecalho?sigla=${acao}`
     const dados_cabecalho = await requisitarDados(url_cabecalho);
-    console.log(dados_cabecalho);
-    
-    if(dados_cabecalho == undefined){
-        criarErro('Erro de conexão com a API');
-        return;
-    }
 
     // Adicionar 'div' geral que recebe todos as seções: cabeçalho, gráfico e tabela
     const main = document.getElementsByTagName("main")[0];
@@ -269,7 +268,9 @@ async function processoRequisicao(){
     div_acao.setAttribute("id", "acoes")
     main.appendChild(div_acao);
 
-    await estruturaCabecalho(div_acao);
+    if(dados_cabecalho != undefined) { 
+        await estruturaCabecalho(div_acao, dados_cabecalho);
+    }
 
     const url_grafico = 'http://localhost:3000/criarGrafico/';
     const option_grafico = {
@@ -280,10 +281,7 @@ async function processoRequisicao(){
 
     const grafico_dados = await requisitarDados(url_grafico, option_grafico);
 
-    if(grafico_dados == undefined){
-        criarErro('Erro de conexão com a API');
-        return;
-    }
+    if(grafico_dados == undefined){ return }
 
     estruturarGrafico(div_acao);
 
