@@ -372,6 +372,7 @@ async function desesnvolveGrafico(dados_tratados_acoes){
 }
 
 function analisarDados(dados_tratados_acoes) {
+    // Maior ação, menor ação, media
     let maiorAcao;
     let menorAcao;
     let media = 0;
@@ -389,14 +390,13 @@ function analisarDados(dados_tratados_acoes) {
     }
 
     media = media / dados_tratados_acoes.length;
-    // Tratar para o formato de apenas dois números após a vírgula
+    // Tratar o número para o formato (...,xx). Apenas dois números após a vírgula.
     media = String(media).split('.')[0] + '.' + String(media).split('.')[1].slice(0, 2);
 
-
     let dados_analisados = {
-        maiorAcao: dados_tratados_acoes[0].sigla + Number(maiorAcao),
-        menorAcao: dados_tratados_acoes[0].sigla +  Number(menorAcao),
-        media: dados_tratados_acoes[0].sigla + Number(media)
+        maiorAcao: dados_tratados_acoes[0].sigla + Number(maiorAcao).toFixed(2),
+        menorAcao: dados_tratados_acoes[0].sigla + Number(menorAcao).toFixed(2),
+        media: dados_tratados_acoes[0].sigla + Number(media).toFixed(2)
     };
 
     return dados_analisados;
