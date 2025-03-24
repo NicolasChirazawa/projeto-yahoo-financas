@@ -18,8 +18,9 @@ app.get('/extrairDados/', async function(req, res){
     const sigla = req.query.sigla;
     const data_inicial = req.query.data_inicial;
     const data_final = req.query.data_final;
+    const moeda = req.query.moeda;
 
-    const requisicao = await extrairDados(sigla, data_inicial, data_final);
+    const requisicao = await extrairDados(sigla, data_inicial, data_final, moeda);
 
     if(typeof requisicao == 'string') { 
         res.status(400).send({statusText: requisicao})

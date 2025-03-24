@@ -72,7 +72,7 @@ function deletarDivAcao(){
     }
 }
 
-function validarCampos(acao, data_inicio, data_final) {
+function validarCampos(acao, data_inicio, data_final, moeda) {
     let data_hoje = descobrirDiaHoje();
     let mensagem_erro = '';
 
@@ -80,20 +80,29 @@ function validarCampos(acao, data_inicio, data_final) {
     if(data_inicio > data_hoje) {
         mensagem_erro += 'A data inícial não pode ser maior que a data atual \n';
     }
+
     if(data_final > data_hoje) {
         mensagem_erro += 'A data final não pode ser maior que a data atual \n';
     }
+
     if(data_inicio > data_final) {
         mensagem_erro += 'A data inicial não pode ser maior que a data final \n';
     }
+
     if(data_inicio == '') {
         mensagem_erro += 'A data inicial não pode estar vazia \n';
     }
+
     if(data_final == '') {
         mensagem_erro += 'A data final não pode estar vazia \n';
     }
+
     if(acao == ''){
         mensagem_erro += 'A ação não pode estar vazia \n';
+    } 
+
+    if(moeda == undefined){
+        mensagem_erro += 'Selecione uma moeda \n';
     } 
 
     if(mensagem_erro == '') { 
@@ -239,16 +248,26 @@ async function processoRequisicao(){
     const data_inicio = document.getElementById("data_inicio").value;
     const data_final = document.getElementById("data_final").value;
 
-    /*
-    const mensagem_erro = validarCampos(acao, data_inicio, data_final);
+    // Obter valor do 'radio button'
+    let moeda = document.getElementsByName("moeda");
+    for(let i = 0; i < moeda.length; i++){   
+        if(moeda[i].checked) {
+            moeda = moeda[i].value;
+            break;
+        } else if (i + 1 == moeda.length) {
+            moeda = undefined;
+            break;
+        }
+    }
+
+    const mensagem_erro = validarCampos(acao, data_inicio, data_final, moeda);
 
     if(mensagem_erro != undefined) {         
         criarErro(mensagem_erro)
         return  
     }
-    */
 
-    const url_acoes = `http://localhost:3000/extrairDados/?sigla=${acao}&data_inicial=${data_inicio}&data_final=${data_final}`;
+    const url_acoes = `http://localhost:3000/extrairDados/?sigla=${acao}&data_inicial=${data_inicio}&data_final=${data_final}&moeda=${moeda}`;
     const dados_acoes = await requisitarDados(url_acoes);
 
     extrairBotao.removeAttribute("disabled");

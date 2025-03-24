@@ -259,7 +259,7 @@ function tratarDados(dados_brutos_acoes){
     return dados_tratados_acoes;
 }
 
-async function extrairDados(sigla, data_inicial_requisicao, data_final_requisicao){
+async function extrairDados(sigla, data_inicial_requisicao, data_final_requisicao, moeda){
 
     const codigo_acao = sigla;
 
@@ -273,6 +273,10 @@ async function extrairDados(sigla, data_inicial_requisicao, data_final_requisica
     let dataInvalida = verificacaoData(data);
     if(dataInvalida.status == true) { 
         return dataInvalida.message;
+    }
+
+    if(moeda == "undefined") {
+        return new Erro('008').lancarMensagem();
     }
 
     // De acordo com a documentação da API, o dia inicial e final não podem ser iguais. Por conta disso, é necessário pular um dia;
@@ -298,7 +302,7 @@ async function extrairDados(sigla, data_inicial_requisicao, data_final_requisica
     let dados_tratados_acoes = tratarDados(dados_brutos_acoes);
 
     // Caso queira converter para dólar
-    let convercao_real = true;
+    const convercao_real = (moeda == 'real') ? true : false;
 
     if(convercao_real){
         dados_tratados_acoes = await converterDolar(dados_tratados_acoes, data);

@@ -22,6 +22,7 @@ class Erro {
             '005': 'A data inicial é maior a data final.',
             '006': 'Erro desconhecido na extração',
             '007': 'Não foi achado nenhuma ação dentro do código e período inserido',
+            '008': 'Não foi inserido uma moeda',
             // 01x: Dados impossíveis de serem retornados
             '011': 'Não foi encontrado ações dentro do período indicado',
             '012': 'Não foi possível converter a moeda para real',
