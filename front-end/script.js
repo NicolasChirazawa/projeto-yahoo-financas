@@ -263,7 +263,8 @@ async function processoRequisicao(){
     const mensagem_erro = validarCampos(acao, data_inicio, data_final, moeda);
 
     if(mensagem_erro != undefined) {         
-        criarErro(mensagem_erro)
+        criarErro(mensagem_erro);
+        extrairBotao.removeAttribute("disabled");
         return  
     }
 
