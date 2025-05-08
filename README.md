@@ -21,7 +21,7 @@ Como usar esse serviço remotamente:
 <h3>Softwares necessários</h3>
 
 • <a href="https://nodejs.org/dist/v22.14.0/node-v22.14.0-x64.msi">Node.JS</a>; <br>
-• <a href="https://code.visualstudio.com/Download">IDE</a> (recomendo VSC); <br>
+<h6>Recomendação: Um editor de código: <a href="https://code.visualstudio.com/sha/download?build=stable&os=win32-x64-user">Visual Studio Code</a>; </h6>
 
 <h3>Comandos</h3>
 1ㅤ <a href=https://github.com/NicolasChirazawa/projeto-yahoo-financas.git>Clone</a> o projeto ou <a href="https://github.com/NicolasChirazawa/projeto-yahoo-financas/archive/refs/heads/main.zip">baixe</a> ele; <br> <br>
